@@ -70,6 +70,10 @@ class User extends CI_Controller {
 		if ($this->_currentUser) { redirect("/user/"); }
 		else { redirect("/user/login/$username"); }
 
+		# +#+#+# $this->session->set_flashdata()
+		# ... https://www.udemy.com/codeignitercourse/learn/v4/t/lecture/4261760?start=0
+		# ... ca. 5'20''
+
 		$this->load->view("inc/footer_view.php");
 	}
 
