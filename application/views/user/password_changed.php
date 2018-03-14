@@ -23,4 +23,4 @@
 
 <p><?= $msg; ?></p>
 
-<p><a href="<?= base_url() ?>user<?= $url_suffix ?>" class="btn">Back</a></p>
+<p><a href="<?= site_url("user").$url_suffix ?>" class="btn">Back</a></p>

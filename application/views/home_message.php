@@ -4,7 +4,7 @@
 <p>This is the website's homepage.</p>
 
 <p>
-  <a href="<?= base_url() ?>user" class="btn">
+  <a href="<?= site_url("user") ?>" class="btn">
     Click here to see User Page
   </a>
 </p>

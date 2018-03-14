@@ -5,5 +5,5 @@
 
 <p>
   <a href="login" class="btn btn-success">Login again</a>
-  <a href="<?= base_url() ?>user" class="btn">Back</a>
+  <a href="<?= site_url("user") ?>" class="btn">Back</a>
 </p>

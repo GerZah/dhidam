@@ -6,7 +6,7 @@
 
   $this->load->helper('form');
 
-  echo form_open("user/do_login", [
+  echo form_open("/user/do_login", [
     "class" => "form-horizontal",
     "method" => "post"
   ]);
@@ -46,4 +46,4 @@
 
 ?>
 
-<p><a href="<?= base_url() ?>user" class="btn">Back</a></p>
+<p><a href="<?= site_url("user") ?>" class="btn">Back</a></p>
