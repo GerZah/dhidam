@@ -28,6 +28,7 @@ class User extends CI_Controller {
 			"currentUserData" => $this->_currentUserData,
 		);
 		$this->load->view("user/debug_output.php", $viewData);
+		$this->load->view("inc/login_logout_etc.php", $viewData);
 
 		$this->load->view("inc/footer_view.php");
 	}
@@ -47,7 +48,6 @@ class User extends CI_Controller {
 
 	// ### Display login form -- or redirect to logged in page
 	public function login($defUsername = false) {
-
 		if ($this->_currentUser) { redirect("/user/"); }
 
 		else {
@@ -55,7 +55,6 @@ class User extends CI_Controller {
 			$this->load->view("user/login_form.php", ["defUsername" => $defUsername]);
 			$this->load->view("inc/footer_view.php");
 		}
-
 	}
 
 	// ---------------------------------------------------------------------------
@@ -72,6 +71,44 @@ class User extends CI_Controller {
 		else { redirect("/user/login/$username"); }
 
 		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	// ### Display form to change a user's password
+
+	public function change_password() {
+		if (!$this->_currentUser) { redirect("/user/"); }
+
+		else {
+			$this->load->view("inc/header_view.php");
+			$this->load->view("user/change_password_form.php");
+			$this->load->view("inc/footer_view.php");
+		}
+	}
+
+	// ---------------------------------------------------------------------------
+
+	public function do_change_password() {
+		if (!$this->_currentUser) { redirect("/user/"); }
+
+		else {
+			$this->load->view("inc/header_view.php");
+
+			$oldpassword = $this->input->post("oldpassword");
+			$newpassword = $this->input->post("newpassword");
+			$cnfpassword = $this->input->post("cnfpassword");
+
+			$result = $this->user_model->do_change_password(
+				$this->_currentUser, $oldpassword, $newpassword, $cnfpassword
+			);
+
+			// echo "<pre>$result</pre>";
+
+			$this->load->view("user/password_changed.php", ["result" => $result] );
+
+			$this->load->view("inc/footer_view.php");
+		}
 	}
 
 	// ---------------------------------------------------------------------------

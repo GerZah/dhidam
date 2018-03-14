@@ -1,8 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<?php
+<h1>Login Page</h1>
 
-  echo "<h1>Login Page</h1>\n";
+<?php
 
   $this->load->helper('form');
 
@@ -31,7 +31,7 @@
   if ($defUsername !== false) { $passwordAttr["autofocus"] = 1; }
   echo form_password($passwordAttr);
 
-  echo form_label("Click to Submit:", "loginBtn");
+  // echo form_label("Click to Submit:", "loginBtn");
   echo form_submit([
     "id" => "loginBtn",
     "value" => "Login",
@@ -45,3 +45,5 @@
   }
 
 ?>
+
+<p><a href="<?php echo base_url(); ?>user" class="btn">Back</a></p>

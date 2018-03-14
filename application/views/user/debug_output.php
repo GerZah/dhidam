@@ -9,8 +9,3 @@
     echo "<pre>". print_r($currentUserData, true) ."</pre>\n";
   }
 ?>
-
-<p>
-  <a class="btn" href="<?php echo base_url(); ?>user/login">Login</a>
-  <a class="btn" href="<?php echo base_url(); ?>user/logout">Logout</a>
-</p>
