@@ -7,7 +7,7 @@
   $err = "<strong>Error:</strong>";
 
   switch ($result) {
-    case 6: $msg = "<strong>Success</strong>: Password chancged successfully."; break;
+    case 6: $msg = "<strong>Success</strong>: Password changed successfully."; break;
     case 5: $msg = "$err Error while updating password."; break;
     case 4: $msg = "$err New password confirmation entered incorrectly."; break;
     case 3: $msg = "$err New password may not be left blank."; break;
@@ -17,8 +17,10 @@
     default: $msg = "$err Unexpected Error."; break;
   }
 
+  $url_suffix = ($result == 6 ? "" : "/change_password");
+
 ?>
 
-<p><?php echo $msg; ?></p>
+<p><?= $msg; ?></p>
 
-<p><a href="<?php echo base_url(); ?>user" class="btn">Back</a></p>
+<p><a href="<?= base_url() ?>user<?= $url_suffix ?>" class="btn">Back</a></p>

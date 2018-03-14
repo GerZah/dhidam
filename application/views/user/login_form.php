@@ -46,4 +46,4 @@
 
 ?>
 
-<p><a href="<?php echo base_url(); ?>user" class="btn">Back</a></p>
+<p><a href="<?= base_url() ?>user" class="btn">Back</a></p>

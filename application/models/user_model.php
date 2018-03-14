@@ -61,50 +61,43 @@
     function do_change_password($currentUser, $oldpassword, $newpassword, $cnfpassword) {
       // echo "<pre>$currentUser / $oldpassword / $newpassword / $cnfpassword</pre>";
 
-      $result = 0; // Error: unexpected error
-
       $q = $this->db
       ->select(["shasalt", "shapwd"])
       ->from("user")
       ->where(["id" => $currentUser])
       ->get();
 
-      if ($q->num_rows() == 1) { // User found?
-        $user = $q->row_array();
-        $shapwd = sha1($oldpassword.$user["shasalt"]);
+      if ($q->num_rows() != 1) { return 1; } // Error: User not found
+      // else
 
-        if ($shapwd == $user["shapwd"]) { // Old password correct?
+      $user = $q->row_array();
+      $shapwd = sha1($oldpassword.$user["shasalt"]);
 
-          $newpassword = trim($newpassword);
-          if ($newpassword != "") { // Non-empty new password?
+      if ($shapwd != $user["shapwd"]) { return 2; } // Error: Wrong old password
+      // else
 
-            if ($newpassword == $cnfpassword) { // New password correctly confirmed?
+      $newpassword = trim($newpassword);
+      if ($newpassword == "") { return 3; } // Error: Empty new password
+      // else
 
-              $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
-              $shapwd = sha1($newpassword.$shasalt);
-              // echo "<pre>$shasalt / $shapwd</pre>";
+      if ($newpassword != $cnfpassword) { return 4; } // Error: Wrong password confirmation
+      // else
 
-              $q = $this->db
-              ->where("id", $currentUser)
-              ->update("user", [
-                "shapwd" => $shapwd,
-                "shasalt" => $shasalt
-              ]);
+      $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
+      $shapwd = sha1($newpassword.$shasalt);
+      // echo "<pre>$shasalt / $shapwd</pre>";
 
-              if ($this->db->affected_rows()==1) {
-                $result = 6; // Success: No Error
-              }
-              else { $result = 5; } // Error while upddating password
-            }
-            else { $result = 4; } // Error: Wrong password confirmation
-          }
-          else { $result = 3; } // Error: Empty new password
-        }
-        else { $result = 2; } // Error: Wrong old password
-      }
-      else { $result = 1; } // Error: User not found
+      $q = $this->db
+      ->where("id", $currentUser)
+      ->update("user", [
+        "shapwd" => $shapwd,
+        "shasalt" => $shasalt
+      ]);
 
-      return $result;
+      if ($this->db->affected_rows()!=1) { return 5; } // Error while upddating password
+      // else
+
+      return 6;  // Success: No Error
 
     }
 
