@@ -4,6 +4,37 @@
 
     // ---------------------------------------------------------------------------
 
+  	protected $_currentUser;
+  	protected $_currentUserData;
+
+    // ----------------------
+
+    public function currentUser() { return $this->_currentUser; }
+    public function currentUserData() { return $this->_currentUserData; }
+
+    // ---------------------------------------------------------------------------
+
+    public function __construct() {
+  		parent::__construct();
+
+      $this->_currentUser = $this->session->userdata("userID");
+  		$this->_currentUserData = $this->get_UserData($this->_currentUser);
+    }
+
+    // ---------------------------------------------------------------------------
+
+    public function enforceNoLogin($redirectTarget = "/user/") {
+      if ($this->_currentUser) { redirect($redirectTarget); }
+    }
+
+    // ----------------------
+
+    public function enforceLogin($redirectTarget = "/user/") {
+      if (!$this->_currentUser) { redirect($redirectTarget); }
+    }
+
+    // ---------------------------------------------------------------------------
+
     function logout() {
       session_destroy();
     }
@@ -58,8 +89,10 @@
 
     // ---------------------------------------------------------------------------
 
-    function do_change_password($currentUser, $oldpassword, $newpassword, $cnfpassword) {
+    function do_change_password($oldpassword, $newpassword, $cnfpassword) {
       // echo "<pre>$currentUser / $oldpassword / $newpassword / $cnfpassword</pre>";
+
+      $currentUser = $this->_currentUser;
 
       $q = $this->db
       ->select(["shasalt", "shapwd"])

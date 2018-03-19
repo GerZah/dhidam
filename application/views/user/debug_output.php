@@ -2,7 +2,7 @@
 
 <?php
 
-  echo "<pre>". print_r($this->session->userdata(),true) ."</pre>\n";
+  // echo "<pre>". print_r($this->session->userdata(),true) ."</pre>\n";
 
   if ($currentUser) {
     // echo "<pre>". $currentUser ."</pre>\n";
