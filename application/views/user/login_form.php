@@ -4,6 +4,8 @@
 
 <?php
 
+  $defUsername = $this->session->flashdata("defUsername");
+
   $this->load->helper('form');
 
   echo form_open("/user/do_login", [
@@ -39,10 +41,6 @@
   ]);
 
   echo form_close();
-
-  if ($defUsername !== false) {
-    echo "<p><strong>Login failed</strong> – please try again.</p>";
-  }
 
 ?>
 

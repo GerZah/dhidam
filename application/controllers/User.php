@@ -14,12 +14,12 @@ class User extends CI_Controller {
 	public function index() {
 		$this->load->view("inc/header_view.php");
 
-		$viewData = array(
+		$viewData = [
 			"currentUser" => $this->user_model->currentUser(),
 			"currentUserData" => $this->user_model->currentUserData(),
-		);
-		$this->load->view("user/debug_output.php", $viewData);
+		];
 		$this->load->view("inc/login_logout_etc.php", $viewData);
+		$this->load->view("user/debug_output.php", $viewData);
 
 		$this->load->view("inc/footer_view.php");
 	}
@@ -39,11 +39,11 @@ class User extends CI_Controller {
 	// ---------------------------------------------------------------------------
 
 	// ### Display login form -- or redirect to logged in page
-	public function login($defUsername = false) {
+	public function login() {
 		$this->user_model->enforceNoLogin(); // ... or else ...
 
 		$this->load->view("inc/header_view.php");
-		$this->load->view("user/login_form.php", ["defUsername" => $defUsername]);
+		$this->load->view("user/login_form.php");
 		$this->load->view("inc/footer_view.php");
 	}
 
@@ -58,7 +58,13 @@ class User extends CI_Controller {
 		$this->user_model->do_login($username, $password);
 
 		if ($this->user_model->currentUser()) { redirect("/user/"); }
-		else { redirect("/user/login/$username"); }
+		else {
+			$this->session->set_flashdata([
+				"notification" => "<strong>Login failed</strong> – please try again.",
+				"defUsername" => $username
+			]);
+			redirect("/user/login/");
+		}
 	}
 
 	// ---------------------------------------------------------------------------
@@ -68,10 +74,10 @@ class User extends CI_Controller {
 	public function change_password() {
 		$this->user_model->enforceLogin(); // ... or else ...
 
-		$viewData = array(
+		$viewData = [
 			"username" => $this->user_model->currentUserData()["username"],
 			"result" => $this->session->flashdata("passChangeResult")
-		);
+		];
 
 		$this->load->view("inc/header_view.php");
 		$this->load->view("user/change_password_form.php", $viewData);

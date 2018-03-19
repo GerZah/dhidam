@@ -35,9 +35,7 @@
 
     // ---------------------------------------------------------------------------
 
-    function logout() {
-      session_destroy();
-    }
+    function logout() { session_destroy(); }
 
     // ---------------------------------------------------------------------------
 
@@ -56,17 +54,11 @@
         $shapwd = sha1($password.$user["shasalt"]);
 
         if ($shapwd == $user["shapwd"]) {
-          $this->session->set_userdata(array(
-            "userID" => $user["id"],
-          ));
-        }
-        else {
-          $this->logout();
+          $this->session->set_userdata([ "userID" => $user["id"], ]);
+          $this->_currentUser = $user["id"];
+          $this->_currentUserData = $this->get_UserData($this->_currentUser);
         }
       }
-
-      $this->_currentUser = $this->session->userdata("userID");
-      $this->_currentUserData = $this->get_UserData($this->_currentUser);
     }
 
     // ---------------------------------------------------------------------------
