@@ -2,7 +2,25 @@
 
 <h1>Change Password</h1>
 
+<p><strong>Current Username:</strong> <?= $username ?></p>
+
 <?php
+
+  if ($result) {
+    $msg = "";
+    $err = "<strong>Error:</strong>";
+
+    switch ($result) {
+      case 6: $msg = "<strong>Success</strong>: Password changed successfully."; break;
+      case 5: $msg = "$err Error while updating password."; break;
+      case 4: $msg = "$err New password confirmation entered incorrectly."; break;
+      case 3: $msg = "$err New password may not be left blank."; break;
+      case 2: $msg = "$err Current password entered incorrectly."; break;
+      case 1: $msg = "$err User not found."; break;
+    }
+
+    echo "<p>$msg</p>";
+  }
 
   $this->load->helper('form');
 
@@ -16,6 +34,7 @@
     "id" => "oldpassword",
     "name" => "oldpassword",
     "placeholder" => "Please enter your current password",
+    "autofocus" => 1,
   );
   echo form_password($oldPasswordAttr);
 

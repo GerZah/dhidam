@@ -5,6 +5,7 @@ class User extends CI_Controller {
 	// ---------------------------------------------------------------------------
 
 	protected $_currentUser;
+	protected $_currentUserData;
 
 	// ---------------------------------------------------------------------------
 
@@ -85,8 +86,15 @@ class User extends CI_Controller {
 		if (!$this->_currentUser) { redirect("/user/"); }
 
 		else {
+			$viewData = array(
+				"username" => $this->_currentUserData["username"],
+				"result" => $this->session->flashdata("passChangeResult")
+			);
+			// if ( null !== $this->session->flashdata("passChangeResult") ) {
+			// 	$viewData["result"] = $this->session->flashdata("passChangeResult");
+			// }
 			$this->load->view("inc/header_view.php");
-			$this->load->view("user/change_password_form.php");
+			$this->load->view("user/change_password_form.php", $viewData);
 			$this->load->view("inc/footer_view.php");
 		}
 	}
@@ -97,7 +105,6 @@ class User extends CI_Controller {
 		if (!$this->_currentUser) { redirect("/user/"); }
 
 		else {
-			$this->load->view("inc/header_view.php");
 
 			$oldpassword = $this->input->post("oldpassword");
 			$newpassword = $this->input->post("newpassword");
@@ -107,10 +114,13 @@ class User extends CI_Controller {
 				$this->_currentUser, $oldpassword, $newpassword, $cnfpassword
 			);
 
-			// echo "<pre>$result</pre>";
+			if ($result!=6) {
+				$this->session->set_flashdata( [ "passChangeResult" => $result ] );
+				redirect("/user/change_password");
+			}
 
-			$this->load->view("user/password_changed.php", ["result" => $result] );
-
+			$this->load->view("inc/header_view.php");
+			$this->load->view("user/password_changed.php");
 			$this->load->view("inc/footer_view.php");
 		}
 	}

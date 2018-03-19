@@ -6,6 +6,6 @@
 
   if ($currentUser) {
     // echo "<pre>". $currentUser ."</pre>\n";
-    echo "<pre>". print_r($currentUserData, true) ."</pre>\n";
+    echo "<pre>currentUserData:<br />". print_r($currentUserData, true) ."</pre>\n";
   }
 ?>
