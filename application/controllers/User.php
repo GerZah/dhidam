@@ -17,6 +17,9 @@ class User extends CI_Controller {
 		$viewData = [
 			"currentUser" => $this->user_model->currentUser(),
 			"currentUserData" => $this->user_model->currentUserData(),
+			"isSuperAdmin" => $this->user_model->isSuperAdmin(),
+			"isTechAdmin" => $this->user_model->isTechAdmin(),
+			"isAppAdmin" => $this->user_model->isAppAdmin(),
 		];
 		$this->load->view("inc/login_logout_etc.php", $viewData);
 		$this->load->view("user/debug_output.php", $viewData);
@@ -70,7 +73,6 @@ class User extends CI_Controller {
 	// ---------------------------------------------------------------------------
 
 	// ### Display form to change a user's password
-
 	public function change_password() {
 		$this->user_model->enforceLogin(); // ... or else ...
 
@@ -86,6 +88,7 @@ class User extends CI_Controller {
 
 	// ---------------------------------------------------------------------------
 
+	// ### Actually carry out the password change, if possible (old / new password entered correctly)
 	public function do_change_password() {
 		$this->user_model->enforceLogin(); // ... or else ...
 
@@ -104,6 +107,31 @@ class User extends CI_Controller {
 
 		$this->load->view("inc/header_view.php");
 		$this->load->view("user/password_changed.php");
+		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	// ### Display a form to create a new user, if user has sufficient privileges
+	public function create_user() {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
+		$isSuperAdmin = $this->user_model->isSuperAdmin();
+		$isTechAdmin = $this->user_model->isTechAdmin();
+		$isAppAdmin = $this->user_model->isAppAdmin();
+
+		$userRoles = $this->user_model->userRoles;
+
+		$roles = array();
+		if ($isAppAdmin)   { $roles[$userRoles["user"]]      = $userRoles[$userRoles["user"]];  }
+		if ($isTechAdmin)  { $roles[$userRoles["appAdmin"]]  = $userRoles[$userRoles["appAdmin"]];  }
+		if ($isSuperAdmin) { $roles[$userRoles["techAdmin"]] = $userRoles[$userRoles["techAdmin"]];  }
+
+		$viewData = [ "roles" => $roles ];
+
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/create_user.php", $viewData);
 		$this->load->view("inc/footer_view.php");
 	}
 

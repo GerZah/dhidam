@@ -62,6 +62,8 @@
     "class" => "btn btn-success"
   ]);
 
+  echo form_close();
+
 ?>
 
 <p><a href="<?= site_url("user") ?>" class="btn">Back</a></p>

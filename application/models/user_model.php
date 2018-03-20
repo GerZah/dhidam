@@ -35,6 +35,62 @@
 
     // ---------------------------------------------------------------------------
 
+    public $userRoles = array(
+      "superAdmin" => 0, 0 => "Super Administrator",
+      "techAdmin"  => 1, 1 => "Technical Administrator",
+      "appAdmin"   => 2, 2 => "Application Administrator",
+      "user"       => 3, 3 => "Regular User",
+    );
+
+    // ----------------------
+
+    public function isSuperAdmin() {
+      return (
+        ($this->_currentUser)
+        and ($this->_currentUserData["role"] == $this->userRoles["superAdmin"])
+      );
+    }
+
+    public function enforceSuperAdmin($redirectTarget = "/user/") {
+      if (!$this->isSuperAdmin()) { redirect($redirectTarget); }
+    }
+
+    // ----------------------
+
+    public function isTechAdmin() {
+      return
+      (
+        (
+          ($this->_currentUser)
+          and ($this->_currentUserData["role"] == $this->userRoles["techAdmin"])
+        )
+        or ( $this->isSuperAdmin() )
+      );
+    }
+
+    public function enforceTechAdmin($redirectTarget = "/user/") {
+      if (!$this->isTechAdmin()) { redirect($redirectTarget); }
+    }
+
+    // ----------------------
+
+    public function isAppAdmin() {
+      return
+      (
+        (
+          ($this->_currentUser)
+          and ($this->_currentUserData["role"] == $this->userRoles["appAdmin"])
+        )
+        or ( $this->isTechAdmin() )
+      );
+    }
+
+    public function enforceAppAdmin($redirectTarget = "/user/") {
+      if (!$this->isAppAdmin()) { redirect($redirectTarget); }
+    }
+
+    // ---------------------------------------------------------------------------
+
     function logout() { session_destroy(); }
 
     // ---------------------------------------------------------------------------
@@ -68,7 +124,7 @@
 
       if ($userId) {
         $q = $this->db
-        ->select(["id", "username", "role"])
+        ->select(["id", "username", "email", "role"])
         ->from("user")
         ->where(["id" => $userId])
         ->get();

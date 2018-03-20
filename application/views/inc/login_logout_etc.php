@@ -11,3 +11,9 @@
     <a class="btn" href="<?= site_url("user/logout") ?>">Logout</a>
   <?php } ?>
 </p>
+
+<?php if ($isAppAdmin) { ?>
+  <p>
+    <a class="btn" href="<?= site_url("user/create_user") ?>">Create User</a>
+  </p>
+<?php } ?>
