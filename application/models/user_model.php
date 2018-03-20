@@ -4,16 +4,19 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### hidden storage for currently logged on user details
   	protected $_currentUser;
   	protected $_currentUserData;
 
     // ----------------------
 
+    // ### getter functions for current user ID / current user data
     public function currentUser() { return $this->_currentUser; }
     public function currentUserData() { return $this->_currentUserData; }
 
     // ---------------------------------------------------------------------------
 
+    // ### constructor -- take care of retrieving user data of currently logged on user
     public function __construct() {
   		parent::__construct();
 
@@ -23,18 +26,21 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### checks that no user is logged on, otherwise redirect to user page
     public function enforceNoLogin($redirectTarget = "/user/") {
       if ($this->_currentUser) { redirect($redirectTarget); }
     }
 
     // ----------------------
 
+    // ### checks that a user is logged in, otherwise redirect to user page
     public function enforceLogin($redirectTarget = "/user/") {
       if (!$this->_currentUser) { redirect($redirectTarget); }
     }
 
     // ---------------------------------------------------------------------------
 
+    // ### user roles -- hiararchical, i.e. a superAdmin is also a techAdmin etc.
     public $userRoles = array(
       "superAdmin" => 0, 0 => "Super Administrator",
       "techAdmin"  => 1, 1 => "Technical Administrator",
@@ -44,6 +50,7 @@
 
     // ----------------------
 
+    // ### check wether or not the currently logged on user is a SuperAdmin
     public function isSuperAdmin() {
       return (
         ($this->_currentUser)
@@ -51,12 +58,14 @@
       );
     }
 
+    // ### checks that the currently logged on user is a SuperAdmin, otherwise redirect to user page
     public function enforceSuperAdmin($redirectTarget = "/user/") {
       if (!$this->isSuperAdmin()) { redirect($redirectTarget); }
     }
 
     // ----------------------
 
+    // ### check wether or not the currently logged on user is a TechAdmin
     public function isTechAdmin() {
       return
       (
@@ -68,12 +77,14 @@
       );
     }
 
+    // ### checks that the currently logged on user is a TechAdmin, otherwise redirect to user page
     public function enforceTechAdmin($redirectTarget = "/user/") {
       if (!$this->isTechAdmin()) { redirect($redirectTarget); }
     }
 
     // ----------------------
 
+    // ### check wether or not the currently logged on user is an AppAdmin
     public function isAppAdmin() {
       return
       (
@@ -85,16 +96,19 @@
       );
     }
 
+    // ### checks that the currently logged on user is an AppAdmin, otherwise redirect to user page
     public function enforceAppAdmin($redirectTarget = "/user/") {
       if (!$this->isAppAdmin()) { redirect($redirectTarget); }
     }
 
     // ---------------------------------------------------------------------------
 
+    // ### log out currently logged on user, i.e. destroy the current login session
     function logout() { session_destroy(); }
 
     // ---------------------------------------------------------------------------
 
+    // ### try logging on a user, specified by their username and password
     function do_login($username, $password) {
       $q = $this->db
       ->select(["id", "shasalt", "shapwd"])
@@ -119,6 +133,7 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### retrieve the currently logged on user's data from the database
     function get_userData($userId) {
       $result = array();
 
@@ -137,15 +152,13 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### change currently logged on user's password
     function do_change_password($oldpassword, $newpassword, $cnfpassword) {
-      // echo "<pre>$currentUser / $oldpassword / $newpassword / $cnfpassword</pre>";
-
-      $currentUser = $this->_currentUser;
 
       $q = $this->db
       ->select(["shasalt", "shapwd"])
       ->from("user")
-      ->where(["id" => $currentUser])
+      ->where(["id" => $this->_currentUser])
       ->get();
 
       if ($q->num_rows() != 1) { return 1; } // Error: User not found
@@ -169,7 +182,7 @@
       // echo "<pre>$shasalt / $shapwd</pre>";
 
       $q = $this->db
-      ->where("id", $currentUser)
+      ->where("id", $this->_currentUser)
       ->update("user", [
         "shapwd" => $shapwd,
         "shasalt" => $shasalt
@@ -179,6 +192,76 @@
       // else
 
       return 6;  // Success: No Error
+
+    }
+
+    // ---------------------------------------------------------------------------
+
+    // ### create a user account with given credentials
+    public function create_user($username, $email, $newpassword, $userrole) {
+
+      $username = trim($username);
+      if ($username == "") { return 1; } // Error: User name may not be left blank
+      // else
+
+      $q = $this->db
+      ->select(["id"])
+      ->from("user")
+      ->where(["username" => $username])
+      ->get();
+
+      if ($q->num_rows() == 1) { return 2; } // Error: Username alredy exists
+      // else
+
+      $email = trim($email);
+      if ($email == "") { return 3; } // Error: User name may not be left blank
+      // else
+
+      $q = $this->db
+      ->select(["id"])
+      ->from("user")
+      ->where(["email" => $email])
+      ->get();
+
+      if ($q->num_rows() == 1) { return 4; } // Error: E-mail address already exists
+      // else
+
+      $newpassword = trim($newpassword);
+      if ($newpassword == "") { return 5; } // Error: Empty new password
+      // else
+
+      $isSuperAdmin = $this->isSuperAdmin();
+      $isTechAdmin = $this->isTechAdmin();
+      $isAppAdmin = $this->isAppAdmin();
+
+      $canCreateRoles = array();
+      if ($isSuperAdmin) { $canCreateRoles[] = $this->userRoles["techAdmin"]; }
+      if ($isTechAdmin)  { $canCreateRoles[] = $this->userRoles["appAdmin"]; }
+      if ($isAppAdmin)   { $canCreateRoles[] = $this->userRoles["user"]; }
+
+      if (($isSuperAdmin) and (!in_array($userrole, $canCreateRoles))) { return 6; } // Error: SuperAdmin no privileges
+      // else
+      if (($isTechAdmin) and  (!in_array($userrole, $canCreateRoles))) { return 7; } // Error: TechAdmin no privileges
+      // else
+      if (($isAppAdmin) and   (!in_array($userrole, $canCreateRoles))) { return 8; } // Error: AppAdmin no privileges
+      // else
+
+      $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
+      $shapwd = sha1($newpassword.$shasalt);
+
+      $newUser = array(
+        "username" => $username,
+        "email" => $email,
+        "shapwd" => $shapwd,
+        "shasalt" => $shasalt,
+        "role" => $userrole,
+      );
+
+      $q = $this->db->insert("user", $newUser);
+      if ($this->db->affected_rows()!=1) { return 9; } // Error while upddating password
+      // else
+
+      return 10; # Success!!
 
     }
 

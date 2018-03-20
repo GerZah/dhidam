@@ -128,11 +128,48 @@ class User extends CI_Controller {
 		if ($isTechAdmin)  { $roles[$userRoles["appAdmin"]]  = $userRoles[$userRoles["appAdmin"]];  }
 		if ($isSuperAdmin) { $roles[$userRoles["techAdmin"]] = $userRoles[$userRoles["techAdmin"]];  }
 
-		$viewData = [ "roles" => $roles ];
+		$viewData = [
+			"roles" => $roles,
+			"defUsername" => $this->session->flashdata("defUsername"),
+			"defEmail" => $this->session->flashdata("defEmail"),
+			"defNewPassword" => $this->session->flashdata("defNewPassword"),
+			"defUserRole" => $this->session->flashdata("defUserRole"),
+			"result" => $this->session->flashdata("createUserResult"),
+		];
 
 		$this->load->view("inc/header_view.php");
 		$this->load->view("user/create_user.php", $viewData);
 		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	// ### Actually create a new user, according to the post variables
+	public function do_create_user() {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
+		$username = $this->input->post("username");
+		$email = $this->input->post("email");
+		$newpassword = $this->input->post("newpassword");
+		$userrole = intval($this->input->post("userrole"));
+
+		$result = $this->user_model->create_user(
+			$username, $email, $newpassword, $userrole
+		);
+
+		if ($result!=10) { # +#+#+# 10 == no error
+			$this->session->set_flashdata([
+				"defUsername" => $username,
+				"defEmail" => $email,
+				"defNewPassword" => $newpassword,
+				"defUserRole" => $userrole,
+				"createUserResult" => $result,
+			]);
+			redirect("/user/create_user");
+		}
+
+
 	}
 
 	// ---------------------------------------------------------------------------

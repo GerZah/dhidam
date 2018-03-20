@@ -2,8 +2,6 @@
 
 <h1>Change Password</h1>
 
-<p><strong>Current Username:</strong> <?= $username ?></p>
-
 <?php
 
   if ($result) {
@@ -19,8 +17,14 @@
       case 1: $msg = "$err User not found."; break;
     }
 
-    echo "<p>$msg</p>";
+    echo "<div class='alert'>$msg</div>";
   }
+
+?>
+
+<p><strong>Current Username:</strong> <?= $username ?></p>
+
+<?php
 
   $this->load->helper('form');
 
