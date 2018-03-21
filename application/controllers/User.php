@@ -158,7 +158,7 @@ class User extends CI_Controller {
 			$username, $email, $newpassword, $userrole
 		);
 
-		if ($result!=10) { # +#+#+# 10 == no error
+		if ($result!=10) {
 			$this->session->set_flashdata([
 				"defUsername" => $username,
 				"defEmail" => $email,
@@ -169,7 +169,9 @@ class User extends CI_Controller {
 			redirect("/user/create_user");
 		}
 
-
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/user_created.php", ["username" => $username] );
+		$this->load->view("inc/footer_view.php");
 	}
 
 	// ---------------------------------------------------------------------------
