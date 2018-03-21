@@ -176,4 +176,23 @@ class User extends CI_Controller {
 
 	// ---------------------------------------------------------------------------
 
+	// ### present a user table, with user maintenance (according to privileges)
+	public function user_table($page = 0) {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
+		$tablePage = $this->user_model->getUserTable($page);
+
+		$this->load->library('table');
+		$this->table->set_heading( ["Username", "E-Mail", "Role", "Role Verbatim"] );
+		$this->table->set_template( ["table_open" => "<table class='table'>"] );
+		$tableTable = $this->table->generate($tablePage);
+
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/user_table.php", [ "tableTable" => $tableTable] );
+		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
 }

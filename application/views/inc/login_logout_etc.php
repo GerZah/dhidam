@@ -15,5 +15,6 @@
 <?php if ($isAppAdmin) { ?>
   <p>
     <a class="btn" href="<?= site_url("user/create_user") ?>">Create User</a>
+    <a class="btn" href="<?= site_url("user/user_table") ?>">List Users</a>
   </p>
 <?php } ?>

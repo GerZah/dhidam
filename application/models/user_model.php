@@ -267,6 +267,34 @@
 
     // ---------------------------------------------------------------------------
 
+    public function getUserTable($page = 0) {
+
+      $numPerPage = 15;
+
+      $cnt = $this->db->count_all('user');
+      $maxPage = intval(($cnt-1)/$numPerPage);
+
+      $page = ($page < 0 ? 0 : $page);
+      $page = ($page > $maxPage ? $maxPage : $page);
+
+      $skip = $page * $numPerPage;
+
+      $qu = $this->db
+      ->select(["username", "email", "role"])
+      ->get("user", $numPerPage, $skip);
+
+      $result = array();
+
+      foreach($qu->result_array() as $row) {
+        $row["roleVerb"] = $this->userRoles[ $row["role"] ];
+        $result[] = $row;
+      }
+
+      return $result;
+
+    }
+
+    // ---------------------------------------------------------------------------
   }
 
 ?>
