@@ -224,7 +224,7 @@
     public function create_user($username, $email, $newpassword, $userrole) {
 
       $username = trim($username);
-      if ($username == "") { return 1; } // Error: User name may not be left blank
+      if ($username == "") { return 2; } // Error: User name may not be left blank
       // else
 
       $q = $this->db
@@ -233,11 +233,11 @@
       ->where(["username" => $username])
       ->get();
 
-      if ($q->num_rows() == 1) { return 2; } // Error: Username alredy exists
+      if ($q->num_rows() == 1) { return 3; } // Error: Username alredy exists
       // else
 
       $email = trim($email);
-      if ($email == "") { return 3; } // Error: User name may not be left blank
+      if ($email == "") { return 4; } // Error: User name may not be left blank
       // else
 
       $q = $this->db
@@ -246,11 +246,11 @@
       ->where(["email" => $email])
       ->get();
 
-      if ($q->num_rows() == 1) { return 4; } // Error: E-mail address already exists
+      if ($q->num_rows() == 1) { return 5; } // Error: E-mail address already exists
       // else
 
       $newpassword = trim($newpassword);
-      if ($newpassword == "") { return 5; } // Error: Empty new password
+      if ($newpassword == "") { return 6; } // Error: Empty new password
       // else
 
       $isSuperAdmin = $this->isSuperAdmin();
@@ -262,11 +262,11 @@
       if ($isTechAdmin)  { $canCreateRoles[] = $this->userRoles["appAdmin"]; }
       if ($isAppAdmin)   { $canCreateRoles[] = $this->userRoles["user"]; }
 
-      if (($isSuperAdmin) and (!in_array($userrole, $canCreateRoles))) { return 6; } // Error: SuperAdmin no privileges
+      if (($isSuperAdmin) and (!in_array($userrole, $canCreateRoles))) { return 7; } // Error: SuperAdmin no privileges
       // else
-      if (($isTechAdmin) and  (!in_array($userrole, $canCreateRoles))) { return 7; } // Error: TechAdmin no privileges
+      if (($isTechAdmin) and  (!in_array($userrole, $canCreateRoles))) { return 8; } // Error: TechAdmin no privileges
       // else
-      if (($isAppAdmin) and   (!in_array($userrole, $canCreateRoles))) { return 8; } // Error: AppAdmin no privileges
+      if (($isAppAdmin) and   (!in_array($userrole, $canCreateRoles))) { return 9; } // Error: AppAdmin no privileges
       // else
 
       $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
@@ -281,10 +281,10 @@
       );
 
       $q = $this->db->insert("user", $newUser);
-      if ($this->db->affected_rows()!=1) { return 9; } // Error while upddating password
+      if ($this->db->affected_rows()!=1) { return 10; } // Error while upddating password
       // else
 
-      return 10; # Success!!
+      return 1; # Success!!
 
     }
 

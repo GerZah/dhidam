@@ -167,7 +167,7 @@ class User extends CI_Controller {
 			$username, $email, $newpassword, $userrole
 		);
 
-		if ($result!=10) {
+		if ($result!=1) {
 			$this->session->set_flashdata([
 				"defUsername" => $username,
 				"defEmail" => $email,
