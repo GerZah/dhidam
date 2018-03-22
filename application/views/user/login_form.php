@@ -28,7 +28,7 @@
           } break;
           case 2: {
             errMsg="<?= $errorMessages[2] ?>";
-            $("#password").focus(); break;
+            $("#password").focus();
           } break;
         }
         $("#alert").hide().html(errMsg).show("slow");
