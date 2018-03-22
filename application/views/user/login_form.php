@@ -74,6 +74,7 @@
     "placeholder" => "Please enter your user name",
     "value" => $defUsername,
     // "class" => "form-control",
+    // "required" => 1,
   );
   if (!$defUsername) { $usernameAttr["autofocus"] = 1; }
   echo form_input($usernameAttr);
@@ -83,6 +84,7 @@
     "id" => "password",
     "name" => "password",
     "placeholder" => "Please enter your password",
+    // "required" => 1,
   );
   if ($defUsername) { $passwordAttr["autofocus"] = 1; }
   echo form_password($passwordAttr);
