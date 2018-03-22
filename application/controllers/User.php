@@ -87,7 +87,7 @@ class User extends CI_Controller {
 
 		$viewData = [
 			"username" => $this->user_model->currentUserData()["username"],
-			"result" => $this->session->flashdata("passChangeResult")
+			"passChangeResult" => $this->session->flashdata("passChangeResult")
 		];
 
 		$this->load->view("inc/header_view.php");
@@ -105,12 +105,12 @@ class User extends CI_Controller {
 		$newpassword = $this->input->post("newpassword");
 		$cnfpassword = $this->input->post("cnfpassword");
 
-		$result = $this->user_model->do_change_password(
+		$passChangeResult = $this->user_model->do_change_password(
 			$oldpassword, $newpassword, $cnfpassword
 		);
 
-		if ($result!=6) {
-			$this->session->set_flashdata( [ "passChangeResult" => $result ] );
+		if ($passChangeResult!=8) {
+			$this->session->set_flashdata( [ "passChangeResult" => $passChangeResult ] );
 			redirect("/user/change_password");
 		}
 

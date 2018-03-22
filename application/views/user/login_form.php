@@ -31,7 +31,7 @@
             $("#password").focus(); break;
           } break;
         }
-        $("#alert").show().html(errMsg);
+        $("#alert").hide().html(errMsg).show("slow");
         event.preventDefault();
       }
     });
