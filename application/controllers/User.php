@@ -143,7 +143,7 @@ class User extends CI_Controller {
 			"defEmail" => $this->session->flashdata("defEmail"),
 			"defNewPassword" => $this->session->flashdata("defNewPassword"),
 			"defUserRole" => $this->session->flashdata("defUserRole"),
-			"result" => $this->session->flashdata("createUserResult"),
+			"createUserResult" => $this->session->flashdata("createUserResult"),
 		];
 
 		$this->load->view("inc/header_view.php");
@@ -163,17 +163,17 @@ class User extends CI_Controller {
 		$newpassword = $this->input->post("newpassword");
 		$userrole = intval($this->input->post("userrole"));
 
-		$result = $this->user_model->create_user(
+		$createUserResult = $this->user_model->create_user(
 			$username, $email, $newpassword, $userrole
 		);
 
-		if ($result!=1) {
+		if ($createUserResult!=1) {
 			$this->session->set_flashdata([
 				"defUsername" => $username,
 				"defEmail" => $email,
 				"defNewPassword" => $newpassword,
 				"defUserRole" => $userrole,
-				"createUserResult" => $result,
+				"createUserResult" => $createUserResult,
 			]);
 			redirect("/user/create_user");
 		}

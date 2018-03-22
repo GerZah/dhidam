@@ -240,6 +240,10 @@
       if ($email == "") { return 4; } // Error: User name may not be left blank
       // else
 
+      $email_valid = (filter_var($email, FILTER_VALIDATE_EMAIL));
+      if (!$email_valid) { return 11; } // Error: Invalid e-mail address
+      // else
+
       $q = $this->db
       ->select(["id"])
       ->from("user")
