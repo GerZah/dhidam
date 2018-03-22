@@ -3,15 +3,15 @@
 <?php
   $err = "<strong>Error:</strong>";
   $errorMessages = [
-    1 => "$err User not found.",
-    2 => "$err Current password may not be left blank.",
-    3 => "$err Current password entered incorrectly.",
-    4 => "$err New password may not be left blank.",
-    5 => "$err Password conformation may not be left blank.",
-    6 => "$err New password confirmation entered incorrectly.",
-    7 => "$err Error while updating password.",
-    8 => "<strong>Success</strong>: Password changed successfully.",
-    9 => "$err Unknown error.",
+    0 => "$err Unknown error.",
+    1 => "<strong>Success</strong>: Password changed successfully.",
+    2 => "$err User not found.",
+    3 => "$err Current password may not be left blank.",
+    4 => "$err Current password entered incorrectly.",
+    5 => "$err New password may not be left blank.",
+    6 => "$err Password conformation may not be left blank.",
+    7 => "$err New password confirmation entered incorrectly.",
+    8 => "$err Error while updating password.",
   ];
 ?>
 
@@ -22,27 +22,27 @@
       var oldpassword = $("#oldpassword").val().trim();
       var newpassword = $("#newpassword").val().trim();
       var cnfpassword = $("#cnfpassword").val().trim();
-      if (!oldpassword) { error = 2; }
-      else if (!newpassword) { error = 4; }
-      else if (!cnfpassword) { error = 5; }
-      else if (newpassword != cnfpassword) { error = 6; }
+      if (!oldpassword) { error = 3; }
+      else if (!newpassword) { error = 5; }
+      else if (!cnfpassword) { error = 6; }
+      else if (newpassword != cnfpassword) { error = 7; }
       if (error) {
         var errMsg = "";
         switch (error) {
-          case 2: {
-            errMsg="<?= $errorMessages[2] ?>";
+          case 3: {
+            errMsg="<?= $errorMessages[3] ?>";
             $("#oldpassword").focus();
-          } break;
-          case 4: {
-            errMsg="<?= $errorMessages[4] ?>";
-            $("#newpassword").focus(); break;
           } break;
           case 5: {
             errMsg="<?= $errorMessages[5] ?>";
-            $("#cnfpassword").focus(); break;
+            $("#newpassword").focus(); break;
           } break;
           case 6: {
             errMsg="<?= $errorMessages[6] ?>";
+            $("#cnfpassword").focus(); break;
+          } break;
+          case 7: {
+            errMsg="<?= $errorMessages[7] ?>";
             $("#cnfpassword").focus(); break;
           } break;
         }
@@ -66,7 +66,7 @@
     $errorMessage = (
       $errorMessages[$passChangeResult]
       ? $errorMessages[$passChangeResult]
-      : $errorMessages[9]
+      : $errorMessages[0]
     );
   }
   echo $errorMessage;

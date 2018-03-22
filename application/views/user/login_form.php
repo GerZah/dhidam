@@ -4,10 +4,10 @@
   $note = "<strong>Note:</strong>";
   $err = "<strong>Error:</strong>";
   $errorMessages = [
+    0 => "$err Unknown error.",
     1 => "$note User name can not be left blank.",
     2 => "$note Password field can not be left blank.",
     3 => "$err Login failed. Please try again.",
-    4 => "$err Unknown error.",
   ];
 ?>
 
@@ -50,7 +50,7 @@
     $errorMessage = (
       $errorMessages[$loginError]
       ? $errorMessages[$loginError]
-      : $errorMessages[4]
+      : $errorMessages[0]
     );
   }
   echo $errorMessage;

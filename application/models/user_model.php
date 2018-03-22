@@ -176,28 +176,28 @@
       ->where(["id" => $this->_currentUser])
       ->get();
 
-      if ($q->num_rows() != 1) { return 1; } // Error: User not found
+      if ($q->num_rows() != 1) { return 2; } // Error: User not found
       // else
 
       $oldpassword = trim($oldpassword);
-      if ($oldpassword == "") { return 2; } // Error: Empty old password
+      if ($oldpassword == "") { return 3; } // Error: Empty old password
       // else
 
       $user = $q->row_array();
       $shapwd = sha1($oldpassword.$user["shasalt"]);
 
-      if ($shapwd != $user["shapwd"]) { return 3; } // Error: Wrong old password
+      if ($shapwd != $user["shapwd"]) { return 4; } // Error: Wrong old password
       // else
 
       $newpassword = trim($newpassword);
-      if ($newpassword == "") { return 4; } // Error: Empty new password
+      if ($newpassword == "") { return 5; } // Error: Empty new password
       // else
 
       $cnfpassword = trim($cnfpassword);
-      if ($cnfpassword == "") { return 5; } // Error: Empty conf password
+      if ($cnfpassword == "") { return 6; } // Error: Empty conf password
       // else
 
-      if ($newpassword != $cnfpassword) { return 6; } // Error: Wrong password confirmation
+      if ($newpassword != $cnfpassword) { return 7; } // Error: Wrong password confirmation
       // else
 
       $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
@@ -211,10 +211,10 @@
         "shasalt" => $shasalt
       ]);
 
-      if ($this->db->affected_rows()!=1) { return 7; } // Error while upddating password
+      if ($this->db->affected_rows()!=1) { return 8; } // Error while upddating password
       // else
 
-      return 8;  // Success: No Error
+      return 1;  // Success: No Error
 
     }
 

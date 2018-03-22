@@ -109,7 +109,7 @@ class User extends CI_Controller {
 			$oldpassword, $newpassword, $cnfpassword
 		);
 
-		if ($passChangeResult!=8) {
+		if ($passChangeResult!=1) {
 			$this->session->set_flashdata( [ "passChangeResult" => $passChangeResult ] );
 			redirect("/user/change_password");
 		}
