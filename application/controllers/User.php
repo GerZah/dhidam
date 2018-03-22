@@ -56,16 +56,23 @@ class User extends CI_Controller {
 	public function do_login() {
 		$this->user_model->enforceNoLogin(); // ... or else ...
 
-		$username = $this->input->post("username");
-		$password = $this->input->post("password");
+		$username = trim($this->input->post("username"));
+		if (!$username) {
+			$this->session->set_flashdata([ "loginError" => 1 ]); // empty user name
+			redirect("/user/login/"); exit;
+		}
+
+		$password = trim($this->input->post("password"));
+		if (!$password) { // empty password
+			$this->session->set_flashdata([ "loginError" => 2, "defUsername" => $username ]);
+			redirect("/user/login/"); exit;
+		}
+
 		$this->user_model->do_login($username, $password);
 
 		if ($this->user_model->currentUser()) { redirect("/user/"); }
-		else {
-			$this->session->set_flashdata([
-				"notification" => "<strong>Login failed</strong> – please try again.",
-				"defUsername" => $username
-			]);
+		else { // Login failed
+			$this->session->set_flashdata([ "loginError" => 3, "defUsername" => $username ]);
 			redirect("/user/login/");
 		}
 	}

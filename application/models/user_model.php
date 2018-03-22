@@ -21,21 +21,29 @@
   		parent::__construct();
 
       $this->_currentUser = $this->session->userdata("userID");
-  		$this->_currentUserData = $this->get_UserData($this->_currentUser);
+      if (!$this->_currentUser) { $this->logout(); }
+      else {
+        $this->_currentUserData = $this->get_UserData($this->_currentUser);
+        if (!$this->_currentUserData) { $this->logout(); }
+      }
+
     }
 
     // ---------------------------------------------------------------------------
 
+    public function isLoggedIn() { return !!($this->_currentUserData); }
+    public function isNotLoggedIn() { return !($this->isLoggedIn());  }
+
     // ### checks that no user is logged on, otherwise redirect to user page
     public function enforceNoLogin($redirectTarget = "/user/") {
-      if ($this->_currentUser) { redirect($redirectTarget); }
+      if ($this->isLoggedIn()) { redirect($redirectTarget); }
     }
 
     // ----------------------
 
     // ### checks that a user is logged in, otherwise redirect to user page
     public function enforceLogin($redirectTarget = "/user/") {
-      if (!$this->_currentUser) { redirect($redirectTarget); }
+      if ($this->isNotLoggedIn()) { redirect($redirectTarget); }
     }
 
     // ---------------------------------------------------------------------------
@@ -53,7 +61,7 @@
     // ### check wether or not the currently logged on user is a SuperAdmin
     public function isSuperAdmin() {
       return (
-        ($this->_currentUser)
+        ($this->isLoggedIn())
         and ($this->_currentUserData["role"] == $this->userRoles["superAdmin"])
       );
     }
@@ -70,7 +78,7 @@
       return
       (
         (
-          ($this->_currentUser)
+          ($this->isLoggedIn())
           and ($this->_currentUserData["role"] == $this->userRoles["techAdmin"])
         )
         or ( $this->isSuperAdmin() )
@@ -89,7 +97,7 @@
       return
       (
         (
-          ($this->_currentUser)
+          ($this->isLoggedIn())
           and ($this->_currentUserData["role"] == $this->userRoles["appAdmin"])
         )
         or ( $this->isTechAdmin() )
@@ -104,7 +112,11 @@
     // ---------------------------------------------------------------------------
 
     // ### log out currently logged on user, i.e. destroy the current login session
-    function logout() { session_destroy(); }
+    function logout() {
+      $this->session->unset_userdata("userID");
+      $this->_currentUser = false;
+      $this->_currentUserData = array();
+    }
 
     // ---------------------------------------------------------------------------
 
@@ -116,19 +128,22 @@
       ->where(["username" => $username])
       ->get();
 
-      $password = trim($password);
+      $success = false; // pessimistic sanity state
 
-      $user = array();
       if ($q->num_rows() == 1) {
         $user = $q->row_array();
+        $password = trim($password);
         $shapwd = sha1($password.$user["shasalt"]);
 
         if ($shapwd == $user["shapwd"]) {
           $this->session->set_userdata([ "userID" => $user["id"], ]);
           $this->_currentUser = $user["id"];
           $this->_currentUserData = $this->get_UserData($this->_currentUser);
+          $success = true;
         }
       }
+
+      if (!$success) { $this->logout(); }
     }
 
     // ---------------------------------------------------------------------------
@@ -144,7 +159,7 @@
         ->where(["id" => $userId])
         ->get();
 
-        $result = $q->row_array();
+        if ($q->num_rows() == 1) { $result = $q->row_array(); }
       }
 
       return $result;

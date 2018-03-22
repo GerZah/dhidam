@@ -4,6 +4,18 @@
 
 <?php
 
+  $loginError = $this->session->flashdata("loginError");
+
+  if ($loginError) {
+    echo "<div class='alert'>\n";
+    switch ($loginError) {
+      case 1: echo "<strong>Note:</strong> User name can not be left blank."; break;
+      case 2: echo "<strong>Note:</strong> Password field can not be left blank."; break;
+      case 3: echo "<strong>Error:</strong> Login failed. Please try again."; break;
+    }
+    echo "</div>\n";
+  }
+
   $defUsername = $this->session->flashdata("defUsername");
 
   $this->load->helper('form');
@@ -21,7 +33,7 @@
     "value" => $defUsername,
     // "class" => "form-control",
   );
-  if ($defUsername === false) { $usernameAttr["autofocus"] = 1; }
+  if (!$defUsername) { $usernameAttr["autofocus"] = 1; }
   echo form_input($usernameAttr);
 
   echo form_label("Password:", "password");
@@ -30,7 +42,7 @@
     "name" => "password",
     "placeholder" => "Please enter your password",
   );
-  if ($defUsername !== false) { $passwordAttr["autofocus"] = 1; }
+  if ($defUsername) { $passwordAttr["autofocus"] = 1; }
   echo form_password($passwordAttr);
 
   // echo form_label("Click to Submit:", "loginBtn");

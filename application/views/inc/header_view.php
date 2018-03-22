@@ -12,7 +12,3 @@
     <!--<header>inc header_view</header>-->
 
     <div class="wrapper"> <!-- start:wrapper -->
-
-<?php if ($this->session->flashdata("notification")) { ?>
-      <div class="alert alert-success"><?= $this->session->flashdata("notification") ?></div>
-<?php } ?>
