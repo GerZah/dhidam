@@ -5,7 +5,7 @@
 # then Save File As ".htaccess"
 
 RewriteEngine On
-RewriteBase /ci
+RewriteBase /dhidam
 
 RewriteCond %{REQUEST_URI} ^system.*
 RewriteRule ^(.*)$ /index.php?/$1 [L]
