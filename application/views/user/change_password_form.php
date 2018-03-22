@@ -4,7 +4,6 @@
   $err = "<strong>Error:</strong>";
   $errorMessages = [
     0 => "$err Unknown error.",
-    1 => "<strong>Success</strong>: Password changed successfully.",
     2 => "$err User not found.",
     3 => "$err Current password may not be left blank.",
     4 => "$err Current password entered incorrectly.",
