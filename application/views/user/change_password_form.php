@@ -34,15 +34,15 @@
           } break;
           case 5: {
             errMsg="<?= $errorMessages[5] ?>";
-            $("#newpassword").focus(); break;
+            $("#newpassword").focus();
           } break;
           case 6: {
             errMsg="<?= $errorMessages[6] ?>";
-            $("#cnfpassword").focus(); break;
+            $("#cnfpassword").focus();
           } break;
           case 7: {
             errMsg="<?= $errorMessages[7] ?>";
-            $("#cnfpassword").focus(); break;
+            $("#cnfpassword").focus();
           } break;
         }
         $("#alert").hide().html(errMsg).show("slow");
