@@ -45,8 +45,10 @@ class User extends CI_Controller {
 	public function login() {
 		$this->user_model->enforceNoLogin(); // ... or else ...
 
+		$loginError = $this->session->flashdata("loginError");
+
 		$this->load->view("inc/header_view.php");
-		$this->load->view("user/login_form.php");
+		$this->load->view("user/login_form.php", [ "loginError" => $loginError ] );
 		$this->load->view("inc/footer_view.php");
 	}
 

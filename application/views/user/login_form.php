@@ -41,8 +41,6 @@
 <h1>Login Page</h1>
 
 <?php
-
-  $loginError = $this->session->flashdata("loginError");
   $alertDisplay = ( $loginError ? "block" : "none" );
 
   echo "<div id='alert' class='alert' style='display:$alertDisplay'>\n";
