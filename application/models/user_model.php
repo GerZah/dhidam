@@ -307,7 +307,7 @@
       $skip = $page * $numPerPage;
 
       $qu = $this->db
-      ->select(["username", "email", "role"])
+      ->select(["id", "username", "email", "role"])
       ->get("user", $numPerPage, $skip);
 
       $result = array();

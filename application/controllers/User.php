@@ -193,12 +193,10 @@ class User extends CI_Controller {
 		$tablePage = $this->user_model->getUserTable($page);
 
 		$this->load->library('table');
-		$this->table->set_heading( ["Username", "E-Mail", "Role", "Role Verbatim"] );
-		$this->table->set_template( ["table_open" => "<table class='table'>"] );
 		$tableTable = $this->table->generate($tablePage);
 
 		$this->load->view("inc/header_view.php");
-		$this->load->view("user/user_table.php", [ "tableTable" => $tableTable] );
+		$this->load->view("user/user_table.php", [ "tablePage" => $tablePage ]);
 		$this->load->view("inc/footer_view.php");
 	}
 
