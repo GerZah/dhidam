@@ -382,7 +382,7 @@
       if ($email != $userData["email"]) { $updates["email"] = $email; }
       if ($userrole != $userData["role"]) { $updates["role"] = $userrole; }
 
-      echo "<pre>".print_r($updates,1)."</pre>";
+      // echo "<pre>".print_r($updates,1)."</pre>";
 
       if (!$updates) { return 10; } // no updates
       // else

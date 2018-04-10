@@ -254,7 +254,7 @@ class User extends CI_Controller {
 			$id, $username, $email, $newpassword, $userrole, $roles
 		);
 
-		echo "<pre>$editUserResult</pre>";
+		echo "<pre>$editUserResult</pre>"; // +#+#+#
 
 	}
 
