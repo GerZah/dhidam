@@ -294,6 +294,7 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### retrieve (segment of) user list including all user data, to be displayed in a table
     public function getUserTable($page = 0) {
 
       $numPerPage = 15;
@@ -318,6 +319,81 @@
       }
 
       return $result;
+
+    }
+
+    // ---------------------------------------------------------------------------
+
+    // ### Update a user -- obviously an admin function, based on the admin's respective privileges
+    public function updateUser( $id, $username, $email, $newpassword, $userrole, $roles) {
+
+      if ($id === false) { return 2; } // no user ID
+      // else
+
+      $userData = $this->get_userData($id);
+      if (!$userData) { return 3; } // user not found
+      // else
+
+      if ( !in_array($userrole, $roles) ) { return 4; } // insufficient privileges to update role
+      // else
+
+      $username = trim($username);
+      if (!$username) { return 5; } // empty user name
+      // else
+
+      if ($username != $userData["username"]) {
+        $q = $this->db
+        ->select(["id"])
+        ->from("user")
+        ->where(["username" => $username])
+        ->get();
+        if ($q->num_rows() == 1) { return 6; } // user name already exists
+      }
+
+      $email = trim($email);
+      if (!$email) { return 7; } // empty e-mail
+      // else
+
+      if ($email != $userData["email"]) {
+        $q = $this->db
+        ->select(["id"])
+        ->from("user")
+        ->where(["email" => $email])
+        ->get();
+        if ($q->num_rows() == 1) { return 8; } // e-mail already exists
+      }
+
+      $email_valid = (filter_var($email, FILTER_VALIDATE_EMAIL));
+      if (!$email_valid) { return 9; } // Error: Invalid e-mail address
+      // else
+
+      $updates = [];
+
+      $newpassword = trim($newpassword);
+      if ($newpassword) {
+        $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
+        $shapwd = sha1($newpassword.$shasalt);
+        // echo "<pre>$shasalt / $shapwd</pre>";
+        $updates["shapwd"] = $shapwd;
+        $updates["shasalt"] = $shasalt;
+      }
+
+      if ($username != $userData["username"]) { $updates["username"] = $username; }
+      if ($email != $userData["email"]) { $updates["email"] = $email; }
+      if ($userrole != $userData["role"]) { $updates["role"] = $userrole; }
+
+      echo "<pre>".print_r($updates,1)."</pre>";
+
+      if (!$updates) { return 10; } // no updates
+      // else
+
+      $q = $this->db
+      ->where("id", $id)
+      ->update("user", $updates);
+      if ($this->db->affected_rows()!=1) { return 10; } // Error while upddating user
+      else
+
+      return 1; # Success!!
 
     }
 

@@ -121,11 +121,10 @@ class User extends CI_Controller {
 
 	// ---------------------------------------------------------------------------
 
-	// ### Display a form to create a new user, if user has sufficient privileges
-	public function create_user() {
-		$this->user_model->enforceLogin(); // ... or else ...
-		$this->user_model->enforceAppAdmin(); // ... or else ...
+	// ### create a (verbatim) array of acceptable user roles for the current admin
+	// ### i.e. everything below the current level of admin
 
+	protected function _fetchUserRoles() {
 		$isSuperAdmin = $this->user_model->isSuperAdmin();
 		$isTechAdmin = $this->user_model->isTechAdmin();
 		$isAppAdmin = $this->user_model->isAppAdmin();
@@ -137,8 +136,18 @@ class User extends CI_Controller {
 		if ($isTechAdmin)  { $roles[$userRoles["appAdmin"]]  = $userRoles[$userRoles["appAdmin"]];  }
 		if ($isSuperAdmin) { $roles[$userRoles["techAdmin"]] = $userRoles[$userRoles["techAdmin"]];  }
 
+		return $roles;
+	}
+
+	// ---------------------------------------------------------------------------
+
+	// ### Display a form to create a new user, if user has sufficient privileges
+	public function create_user() {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
 		$viewData = [
-			"roles" => $roles,
+			"roles" => $this->_fetchUserRoles(),
 			"defUsername" => $this->session->flashdata("defUsername"),
 			"defEmail" => $this->session->flashdata("defEmail"),
 			"defNewPassword" => $this->session->flashdata("defNewPassword"),
@@ -198,6 +207,55 @@ class User extends CI_Controller {
 		$this->load->view("inc/header_view.php");
 		$this->load->view("user/user_table.php", [ "tablePage" => $tablePage ]);
 		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	public function edit_user($id = false) {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
+		$backToUserTable = "/user/user_table";
+		if ($id === false) { redirect($backToUserTable); } // ... or else ..
+
+		$userData = $this->user_model->get_userData($id);
+		if (!$userData) { redirect($backToUserTable); }
+
+		// Make sure that current user can edit only users in less privilgesd roles than their own
+		if ($userData["role"] <= $this->user_model->currentUserData()["role"]) { redirect($backToUserTable); }
+
+		$viewData = [
+			"roles" => $this->_fetchUserRoles(),
+			"userData" => $userData
+		];
+
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/user_admin.php", $viewData );
+		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	public function do_edit_user() {
+		$this->user_model->enforceLogin(); // ... or else ...
+		$this->user_model->enforceAppAdmin(); // ... or else ...
+
+		$id = intval($this->input->post("id"));
+		$username = $this->input->post("username");
+		$email = $this->input->post("email");
+		$newpassword = $this->input->post("newpassword");
+		$userrole = intval($this->input->post("userrole"));
+		$roles = array_keys($this->_fetchUserRoles());
+
+		echo "<pre>Id: $id / Username: $username / E-Mail: $email / Newpassword: $newpassword / User Role: $userrole</pre>";
+		echo "<pre>".print_r($roles,1)."</pre>";
+
+		$editUserResult = $this->user_model->updateUser(
+			$id, $username, $email, $newpassword, $userrole, $roles
+		);
+
+		echo "<pre>$editUserResult</pre>";
+
 	}
 
 	// ---------------------------------------------------------------------------
