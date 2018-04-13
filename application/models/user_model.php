@@ -120,6 +120,17 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### encapsulate the SHA random salt / hash generation
+    function sha1SaltedHash($password, $shasalt = false) {
+      if (!$shasalt) {
+        $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
+      }
+      $shapwd = sha1($password.$shasalt);
+      return [ "shasalt" => $shasalt, "shapwd" => $shapwd ];
+    }
+
+    // ---------------------------------------------------------------------------
+
     // ### try logging on a user, specified by their username and password
     function do_login($username, $password) {
       $q = $this->db
@@ -133,7 +144,7 @@
       if ($q->num_rows() == 1) {
         $user = $q->row_array();
         $password = trim($password);
-        $shapwd = sha1($password.$user["shasalt"]);
+        $shapwd = $this->sha1SaltedHash($password, $user["shasalt"])["shapwd"];
 
         if ($shapwd == $user["shapwd"]) {
           $this->session->set_userdata([ "userID" => $user["id"], ]);
@@ -184,7 +195,7 @@
       // else
 
       $user = $q->row_array();
-      $shapwd = sha1($oldpassword.$user["shasalt"]);
+      $shapwd = $this->sha1SaltedHash($oldpassword, $user["shasalt"])["shapwd"];
 
       if ($shapwd != $user["shapwd"]) { return 4; } // Error: Wrong old password
       // else
@@ -200,16 +211,11 @@
       if ($newpassword != $cnfpassword) { return 7; } // Error: Wrong password confirmation
       // else
 
-      $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
-      $shapwd = sha1($newpassword.$shasalt);
-      // echo "<pre>$shasalt / $shapwd</pre>";
+      $shaSaltAndPwd = $this->sha1SaltedHash($newpassword);
 
       $q = $this->db
       ->where("id", $this->_currentUser)
-      ->update("user", [
-        "shapwd" => $shapwd,
-        "shasalt" => $shasalt
-      ]);
+      ->update("user", $shaSaltAndPwd);
 
       if ($this->db->affected_rows()!=1) { return 8; } // Error while upddating password
       // else
@@ -273,16 +279,16 @@
       if (($isAppAdmin) and   (!in_array($userrole, $canCreateRoles))) { return 9; } // Error: AppAdmin no privileges
       // else
 
-      $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
-      $shapwd = sha1($newpassword.$shasalt);
+      // $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
+      // $shapwd = sha1($newpassword.$shasalt);
 
       $newUser = array(
         "username" => $username,
         "email" => $email,
-        "shapwd" => $shapwd,
-        "shasalt" => $shasalt,
         "role" => $userrole,
       );
+
+      $newUser = array_merge($newUser, $this->sha1SaltedHash($newpassword));
 
       $q = $this->db->insert("user", $newUser);
       if ($this->db->affected_rows()!=1) { return 10; } // Error while upddating password
@@ -371,11 +377,7 @@
 
       $newpassword = trim($newpassword);
       if ($newpassword) {
-        $shasalt = sha1(openssl_random_pseudo_bytes(1024)); // 1k salt entropy
-        $shapwd = sha1($newpassword.$shasalt);
-        // echo "<pre>$shasalt / $shapwd</pre>";
-        $updates["shapwd"] = $shapwd;
-        $updates["shasalt"] = $shasalt;
+        $updates = array_merge($updates, $this->sha1SaltedHash($newpassword));
       }
 
       if ($username != $userData["username"]) { $updates["username"] = $username; }
