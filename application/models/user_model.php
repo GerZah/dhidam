@@ -392,7 +392,7 @@
       $q = $this->db
       ->where("id", $id)
       ->update("user", $updates);
-      if ($this->db->affected_rows()!=1) { return 10; } // Error while upddating user
+      if ($this->db->affected_rows()!=1) { return 11; } // Error while upddating user
       else
 
       return 1; # Success!!

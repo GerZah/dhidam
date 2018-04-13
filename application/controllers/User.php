@@ -233,7 +233,11 @@ class User extends CI_Controller {
 		$viewData = [
 			"roles" => $this->_fetchUserRoles(),
 			"userData" => $userData,
-			"page" => $page
+			"page" => $page,
+			"editUserResult" => $this->session->flashdata("editUserResult"),
+			"defUsername" => $this->session->flashdata("defUsername"),
+			"defEmail" => $this->session->flashdata("defEmail"),
+			"defUserrole" => $this->session->flashdata("defUserrole"),
 		];
 
 		$this->load->view("inc/header_view.php");
@@ -255,19 +259,18 @@ class User extends CI_Controller {
 		$userrole = intval($this->input->post("userrole"));
 		$roles = array_keys($this->_fetchUserRoles());
 
-		echo "<pre>Id: $id / Username: $username / E-Mail: $email / Newpassword: $newpassword / User Role: $userrole</pre>";
-		echo "<pre>".print_r($roles,1)."</pre>";
-
 		$editUserResult = $this->user_model->updateUser(
 			$id, $username, $email, $newpassword, $userrole, $roles
 		);
 
-		echo "<pre>$editUserResult</pre>"; // +#+#+#
-
 		if ($editUserResult!=1) {
 			$this->session->set_flashdata([
-
+				"editUserResult" => $editUserResult,
+				"defUsername" => $username,
+				"defEmail" => $email,
+				"defUserrole" => $userrole,
 			]);
+			redirect("/user/edit_user/$id/$page");
 		}
 		else {
 			$this->session->set_flashdata([ "updateSuccess" => $id ]);
