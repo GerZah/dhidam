@@ -201,17 +201,23 @@ class User extends CI_Controller {
 
 		$tablePage = $this->user_model->getUserTable($page);
 
+		$updateSuccess = $this->session->flashdata("updateSuccess");
+
 		$this->load->library('table');
-		$tableTable = $this->table->generate($tablePage);
 
 		$this->load->view("inc/header_view.php");
-		$this->load->view("user/user_table.php", [ "tablePage" => $tablePage ]);
+		$this->load->view("user/user_table.php", [
+			"tablePage" => $tablePage,
+			"page" => $page,
+			"updateSuccess" => $updateSuccess,
+
+		]);
 		$this->load->view("inc/footer_view.php");
 	}
 
 	// ---------------------------------------------------------------------------
 
-	public function edit_user($id = false) {
+	public function edit_user($id = false, $page = 0) {
 		$this->user_model->enforceLogin(); // ... or else ...
 		$this->user_model->enforceAppAdmin(); // ... or else ...
 
@@ -226,7 +232,8 @@ class User extends CI_Controller {
 
 		$viewData = [
 			"roles" => $this->_fetchUserRoles(),
-			"userData" => $userData
+			"userData" => $userData,
+			"page" => $page
 		];
 
 		$this->load->view("inc/header_view.php");
@@ -241,6 +248,7 @@ class User extends CI_Controller {
 		$this->user_model->enforceAppAdmin(); // ... or else ...
 
 		$id = intval($this->input->post("id"));
+		$page = intval($this->input->post("page"));
 		$username = $this->input->post("username");
 		$email = $this->input->post("email");
 		$newpassword = $this->input->post("newpassword");
@@ -255,6 +263,16 @@ class User extends CI_Controller {
 		);
 
 		echo "<pre>$editUserResult</pre>"; // +#+#+#
+
+		if ($editUserResult!=1) {
+			$this->session->set_flashdata([
+
+			]);
+		}
+		else {
+			$this->session->set_flashdata([ "updateSuccess" => $id ]);
+			redirect("/user/user_table/$page");
+		}
 
 	}
 

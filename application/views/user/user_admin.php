@@ -12,6 +12,7 @@
     "id" => "useradminform",
   ], [
     "id" => $userData["id"],
+    "page" => $page
   ]);
 
   echo form_label("Modified Username:", "username");
@@ -66,4 +67,4 @@
 
 ?>
 
-<p><a href="<?= site_url("user/user_table") ?>" class="btn">Back</a></p>
+<p><a href="<?= site_url("user/user_table/$page") ?>" class="btn">Back</a></p>
