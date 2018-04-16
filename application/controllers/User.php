@@ -46,9 +46,13 @@ class User extends CI_Controller {
 		$this->user_model->enforceNoLogin(); // ... or else ...
 
 		$loginError = $this->session->flashdata("loginError");
+		$defUsername = $this->session->flashdata("defUsername");
 
 		$this->load->view("inc/header_view.php");
-		$this->load->view("user/login_form.php", [ "loginError" => $loginError ] );
+		$this->load->view("user/login_form.php", [
+			"loginError" => $loginError,
+			"defUsername" => $defUsername
+		]);
 		$this->load->view("inc/footer_view.php");
 	}
 
@@ -276,6 +280,75 @@ class User extends CI_Controller {
 			$this->session->set_flashdata([ "updateSuccess" => $id ]);
 			redirect("/user/user_table/$page");
 		}
+
+	}
+
+	// ---------------------------------------------------------------------------
+
+	public function password_reset() {
+		$this->user_model->enforceNoLogin(); // ... or else ...
+
+		$pwdRestError = $this->session->flashdata("pwdRestError");
+
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/password_reset.php", ["pwdRestError" => $pwdRestError]);
+		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	function request_password_reset() {
+		$this->user_model->enforceNoLogin(); // ... or else ...
+
+		$username = trim($this->input->post("username"));
+		if (!$username) {
+			$this->session->set_flashdata([ "pwdRestError" => 1 ]);
+			redirect("/user/password_reset"); exit;
+		}
+		else {
+
+			$url = $this->user_model->password_reset_link($username);
+			if ($url) { $username = $url; } // +#+#+# This should have been sent out via e-mail
+
+			$this->session->set_flashdata([ "loginError" => 4, "defUsername" => $username ]);
+			redirect("/user/login/"); exit; // turf user over to the login screen
+
+		}
+
+	}
+
+	// ---------------------------------------------------------------------------
+
+	function reset_password($resetKey = false) {
+		$this->user_model->enforceNoLogin(); // ... or else ...
+
+		$validResetKey = $this->user_model->isValidResetKey($resetKey);
+
+		$viewData = [
+			"passChangeResult" => 0, // +#+#+#
+			"resetKey" => $resetKey,
+			"validKey" => $validResetKey
+		];
+
+		echo "<pre>".print_r($viewData,1)."</pre>";
+
+		$this->load->view("inc/header_view.php");
+		$this->load->view("user/password_reset_key.php", $viewData);
+		$this->load->view("inc/footer_view.php");
+	}
+
+	// ---------------------------------------------------------------------------
+
+	function do_reset_password() {
+		$this->user_model->enforceNoLogin(); // ... or else ...
+
+		$username = $this->input->post("username");
+		$resetKey = $this->input->post("resetkey");
+		$newpassword = $this->input->post("newpassword");
+		$cnfpassword = $this->input->post("cnfpassword");
+
+		$validResetKey = $this->user_model->isValidResetKey($resetKey, $username);
+
 
 	}
 

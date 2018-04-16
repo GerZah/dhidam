@@ -20,6 +20,8 @@
     public function __construct() {
   		parent::__construct();
 
+      $this->_pwdResetCleanup();
+
       $this->_currentUser = $this->session->userdata("userID");
       if (!$this->_currentUser) { $this->logout(); }
       else {
@@ -400,6 +402,82 @@
     }
 
     // ---------------------------------------------------------------------------
+
+    // ### void (i.e. delete) all password reset keys that are older than 5 minutes
+    protected function _pwdResetCleanup() {
+      $this->db->where('timestamp <=', time() - 5*60)->delete('pwdreset');
+    }
+
+    // ---------------------------------------------------------------------------
+
+    // ### Initiate the password reset sequence for a user given by their name,
+    // ### i.e. send out a password reset e-mail so the user can specify a new password
+    public function password_reset_link($username) {
+
+      $username = trim($username);
+
+      $q = $this->db
+      ->select(["id", "email"])
+      ->from("user")
+      ->where(["username" => $username])
+      ->get();
+
+      if ($q->num_rows() == 1) {
+        $id = $q->row_array()["id"];
+        $this->db->delete('pwdreset', array("id" => $id)); // void/delete previous password reset key for this user
+
+        $resetKey = sha1(openssl_random_pseudo_bytes(1024)); // 1k reset key entropy
+
+        $this->db->insert('pwdreset', [
+          "id" => $id,
+          "resetkey" => $resetKey,
+          "timestamp" => time()
+        ]);
+
+        $resetUrl = site_url("user/reset_password/$resetKey");
+        // +#+#+# This should send out an e-mail with the password reset URL to the user's e-mail address
+
+        return $resetUrl; // +#+#+# this is what we are doing instead now
+      }
+
+      return false;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    public function isValidResetKey($resetKey = false, $username = false) {
+      if ($resetKey === false) { return false; }
+
+      $resetKey = trim($resetKey);
+      if (!$resetKey) { return false; }
+
+      $q = $this->db
+      ->select(["id"])
+      ->from("pwdreset")
+      ->where(["resetkey" => $resetKey])
+      ->get();
+
+      // echo "<pre>".print_r($q->row_array(),1)."</pre>";
+
+      if ($q->num_rows() != 1) { return false; }
+
+      $username = trim($username);
+      if (!$username) {
+        return $q->row_array()["id"];
+      }
+      else {
+        $q = $this->db
+        ->select(["id"])
+        ->from("user")
+        ->where(["id" => $id, "username" => "username"])
+        ->get();
+        if ($q->num_rows() != 1) { return false; }
+        $q->row_array()["id"];
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+
   }
 
 ?>
