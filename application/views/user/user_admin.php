@@ -15,8 +15,59 @@
     10 => "$err No changes to user data.",
     11 => "$err Error while updating user.",
   ];
+
+  $defUsername = ($defUsername ? $defUsername : $userData["username"]);
+  $defEmail = ($defEmail ? $defEmail : $userData["email"]);
+  $defUserrole = ($defUserrole ? $defUserrole : $userData["role"]);
 ?>
 
+<script src="<?=base_url()?>public/js/email_regex.js"></script>
+<script>
+  $(function() {
+    $("#useradminform").submit(function(event){
+      var error = 0;
+      var username = $("#username").val().trim();
+      var email = $("#email").val().trim();
+      var validEmail = validateEmail(email);
+      var newpassword = $("#newpassword").val().trim();
+      var userrole = $("#userrole").val();
+      console.log(username, email, userrole);
+      if (!username) { error = 5; }
+      else if (!email) { error = 7; }
+      else if (!validEmail) { error = 9; }
+      else if (
+        (username == "<?= $defUsername ?>")
+        && (email == "<?= $defEmail ?>")
+        && (userrole == <?= $defUserrole ?>)
+        && (newpassword == "")
+      ) { error = 10; }
+      if (error) {
+        var errMsg = "";
+        switch (error) {
+          case 5: {
+            errMsg="<?= $errorMessages[5] ?>";
+            $("#username").focus();
+          } break;
+          case 7: {
+            errMsg="<?= $errorMessages[7] ?>";
+            $("#email").focus();
+          } break;
+          case 9: {
+            errMsg="<?= $errorMessages[9] ?>";
+            $("#email").focus();
+          } break;
+          case 10: {
+            errMsg="<?= $errorMessages[10] ?>";
+            $("#newpassword").focus();
+          } break;
+        }
+        $("#alert").hide().html(errMsg).show("slow");
+        event.preventDefault();
+      }
+    });
+
+  });
+</script>
 <h1>User Administration</h1>
 
 <?php
@@ -48,7 +99,6 @@
     "page" => $page
   ]);
 
-  $defUsername = ($defUsername ? $defUsername : $userData["username"]);
   echo form_label("Modified Username:", "username");
   $usernameAttr = array(
     "id" => "username",
@@ -61,7 +111,6 @@
   if (in_array($editUserResult, [3,5,6])) { $usernameAttr["autofocus"] = 1; }
   echo form_input($usernameAttr);
 
-  $defEmail = ($defEmail ? $defEmail : $userData["email"]);
   echo form_label("Modified E-Mail:", "email");
   $emailAttr = array(
     "id" => "email",
@@ -74,7 +123,6 @@
   if (in_array($editUserResult, [7,8,9])) { $emailAttr["autofocus"] = 1; }
   echo form_input($emailAttr);
 
-  $defUserrole = ($defUserrole ? $defUserrole : $userData["role"]);
   echo form_label("User Role:", "userrole");
   $roleAttr = array(
     "id" => "userrole",
