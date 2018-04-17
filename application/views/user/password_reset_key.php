@@ -10,119 +10,128 @@
     4 => "$err Password conformation may not be left blank.",
     5 => "$err New password confirmation entered incorrectly.",
     6 => "$err Error while updating password.",
+    7 => "$err Invalid password reset URL."
   ];
 ?>
 
 <script>
-  // $(function() {
-  //   $("#changepasswordform").submit(function(event){
-  //     var error = 0;
-  //     var username = $("#username").val().trim();
-  //     var newpassword = $("#newpassword").val().trim();
-  //     var cnfpassword = $("#cnfpassword").val().trim();
-  //     if (!username) { error = 1; }
-  //     else if (!newpassword) { error = 3; }
-  //     else if (!cnfpassword) { error = 4; }
-  //     else if (newpassword != cnfpassword) { error = 5; }
-  //     if (error) {
-  //       var errMsg = "";
-  //       switch (error) {
-  //         case 1: {
-  //           errMsg="<?= $errorMessages[1] ?>";
-  //           $("#username").focus();
-  //         } break;
-  //         case 3: {
-  //           errMsg="<?= $errorMessages[3] ?>";
-  //           $("#newpassword").focus();
-  //         } break;
-  //         case 4: {
-  //           errMsg="<?= $errorMessages[4] ?>";
-  //           $("#cnfpassword").focus();
-  //         } break;
-  //         case 5: {
-  //           errMsg="<?= $errorMessages[5] ?>";
-  //           $("#cnfpassword").focus();
-  //         } break;
-  //       }
-  //       $("#alert").hide().html(errMsg).show("slow");
-  //       event.preventDefault();
-  //     }
-  //   });
-  // });
+  $(function() {
+    $("#resetpasswordform").submit(function(event){
+      var error = 0;
+      var username = $("#username").val().trim();
+      var newpassword = $("#newpassword").val().trim();
+      var cnfpassword = $("#cnfpassword").val().trim();
+      if (!username) { error = 1; }
+      else if (!newpassword) { error = 3; }
+      else if (!cnfpassword) { error = 4; }
+      else if (newpassword != cnfpassword) { error = 5; }
+      if (error) {
+        var errMsg = "";
+        switch (error) {
+          case 1: {
+            errMsg="<?= $errorMessages[1] ?>";
+            $("#username").focus();
+          } break;
+          case 3: {
+            errMsg="<?= $errorMessages[3] ?>";
+            $("#newpassword").focus();
+          } break;
+          case 4: {
+            errMsg="<?= $errorMessages[4] ?>";
+            $("#cnfpassword").focus();
+          } break;
+          case 5: {
+            errMsg="<?= $errorMessages[5] ?>";
+            $("#cnfpassword").focus();
+          } break;
+        }
+        $("#alert").hide().html(errMsg).show("slow");
+        event.preventDefault();
+      }
+    });
+  });
 </script>
 
 <h1>Set New Password</h1>
 
 <?php
 
-  $alertDisplay = ( $passChangeResult ? "block" : "none" );
+  if (!$validResetKey) {
 
-  echo "<div id='alert' class='alert' style='display:$alertDisplay'>\n";
+    echo "<p>".$errorMessages[7]."</p>";
 
-  $errorMessage = "";
-  if ($passChangeResult) {
-    $errorMessage = (
-      $errorMessages[$passChangeResult]
-      ? $errorMessages[$passChangeResult]
-      : $errorMessages[0]
-    );
   }
-  echo $errorMessage;
+  // else ...
 
-  echo "</div>\n";
+  else {
+    $alertDisplay = ( $passChangeResult ? "block" : "none" );
 
-?>
+    echo "<div id='alert' class='alert' style='display:$alertDisplay'>\n";
 
-<?php
+    $errorMessage = "";
+    if ($passChangeResult) {
+      $errorMessage = (
+        $errorMessages[$passChangeResult]
+        ? $errorMessages[$passChangeResult]
+        : $errorMessages[0]
+      );
+    }
+    echo $errorMessage;
 
-  $this->load->helper('form');
+    echo "</div>\n";
 
-  echo form_open("/user/do_reset_password", [
-    "class" => "form-horizontal",
-    "method" => "post",
-    "id" => "resetpasswordform",
-  ], [
-    "resetkey" => $resetKey
-  ]);
+    $this->load->helper('form');
 
-  echo form_label("Enter username as you did when requesting the password reset:", "username");
-  $usernameAttr = array(
-    "id" => "username",
-    "name" => "username",
-    "placeholder" => "Please enter your user name",
-    "autofocus" => 1,
-    // "class" => "form-control",
-    // "required" => 1,
-  );
-  echo form_input($usernameAttr);
+    echo form_open("/user/do_reset_password", [
+      "class" => "form-horizontal",
+      "method" => "post",
+      "id" => "resetpasswordform",
+    ], [
+      "resetkey" => $resetKey
+    ]);
 
-  echo form_label("New Password:", "newpassword");
-  $newPasswordAttr = array(
-    "id" => "newpassword",
-    "name" => "newpassword",
-    "placeholder" => "Please enter your new password",
-    // "required" => 1,
-  );
-  echo form_password($newPasswordAttr);
+    echo form_label("Enter username as you did when requesting the password reset:", "username");
+    $usernameAttr = array(
+      "id" => "username",
+      "name" => "username",
+      "value" => $defUsername,
+      "placeholder" => "Please enter your user name",
+      // "class" => "form-control",
+      // "required" => 1,
+    );
+    if (in_array($passChangeResult, [0,1])) { $usernameAttr["autofocus"] = 1; }
+    echo form_input($usernameAttr);
 
-  echo "<br />";
+    echo form_label("New Password:", "newpassword");
+    $newPasswordAttr = array(
+      "id" => "newpassword",
+      "name" => "newpassword",
+      "placeholder" => "Please enter your new password",
+      // "required" => 1,
+    );
+    if (in_array($passChangeResult, [3,4,5])) { $newPasswordAttr["autofocus"] = 1; }
+    echo form_password($newPasswordAttr);
 
-  $cnfpasswordAttr = array(
-    "id" => "cnfpassword",
-    "name" => "cnfpassword",
-    "placeholder" => "Please confirm your new password",
-    // "required" => 1,
-  );
-  echo form_password($cnfpasswordAttr);
+    echo "<br />";
 
-  // echo form_label("Click to Submit:", "chgPswdBtn");
-  echo form_submit([
-    "id" => "chgPswdBtn",
-    "value" => "Change Password",
-    "class" => "btn btn-success"
-  ]);
+    $cnfpasswordAttr = array(
+      "id" => "cnfpassword",
+      "name" => "cnfpassword",
+      "placeholder" => "Please confirm your new password",
+      // "required" => 1,
+    );
+    // if (in_array($passChangeResult, [4,5])) { $cnfpasswordAttr["autofocus"] = 1; }
+    echo form_password($cnfpasswordAttr);
 
-  echo form_close();
+    // echo form_label("Click to Submit:", "chgPswdBtn");
+    echo form_submit([
+      "id" => "chgPswdBtn",
+      "value" => "Change Password",
+      "class" => "btn btn-success"
+    ]);
+
+    echo form_close();
+  }
 
 ?>
 

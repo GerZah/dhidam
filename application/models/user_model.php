@@ -180,6 +180,19 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### set new password for one user
+    protected function _set_password($id, $newpassword) {
+      $shaSaltAndPwd = $this->sha1SaltedHash($newpassword);
+
+      $q = $this->db
+      ->where("id", $id)
+      ->update("user", $shaSaltAndPwd);
+
+      return ($this->db->affected_rows()==1);
+    }
+
+    // ---------------------------------------------------------------------------
+
     // ### change currently logged on user's password
     function do_change_password($oldpassword, $newpassword, $cnfpassword) {
 
@@ -213,23 +226,15 @@
       if ($newpassword != $cnfpassword) { return 7; } // Error: Wrong password confirmation
       // else
 
-      $shaSaltAndPwd = $this->sha1SaltedHash($newpassword);
-
-      $q = $this->db
-      ->where("id", $this->_currentUser)
-      ->update("user", $shaSaltAndPwd);
-
-      if ($this->db->affected_rows()!=1) { return 8; } // Error while upddating password
-      // else
-
-      return 1;  // Success: No Error
+      $done = $this->_set_password($this->_currentUser, $newpassword);
+      return ($done ? 1 : 8); // Success vs. Error while upddating password
 
     }
 
     // ---------------------------------------------------------------------------
 
     // ### create a user account with given credentials
-    public function create_user($username, $email, $newpassword, $userrole) {
+    public function createUser($username, $email, $newpassword, $userrole) {
 
       $username = trim($username);
       if ($username == "") { return 2; } // Error: User name may not be left blank
@@ -445,6 +450,7 @@
 
     // ---------------------------------------------------------------------------
 
+    // ### check if reset key exists, and if it matches the username (if given)
     public function isValidResetKey($resetKey = false, $username = false) {
       if ($resetKey === false) { return false; }
 
@@ -461,19 +467,55 @@
 
       if ($q->num_rows() != 1) { return false; }
 
-      $username = trim($username);
-      if (!$username) {
+      if ($username === false) {
         return $q->row_array()["id"];
       }
+
       else {
+        $id = $q->row_array()["id"];
         $q = $this->db
-        ->select(["id"])
+        ->select(["username"])
         ->from("user")
-        ->where(["id" => $id, "username" => "username"])
+        ->where(["id" => $id])
         ->get();
         if ($q->num_rows() != 1) { return false; }
-        $q->row_array()["id"];
+
+        $username = trim($username);
+        return ($username==$q->row_array()["username"]);
       }
+
+      return false;
+    }
+
+    // ---------------------------------------------------------------------------
+
+    // ### reset password if reset key is correct and matches the entered user name
+    public function do_reset_password($username, $resetKey, $newpassword, $cnfpassword) {
+
+  		if (!$username) { return 1; } // no user name given
+      // else ...
+      if (!$resetKey) { return 7 ;} // no reset key given
+      // else ...
+
+      $id = $this->user_model->isValidResetKey($resetKey, $username);
+      if (!$id) { return 2; } // user name and reset key don't match
+      // else ...
+
+      if (!$newpassword) { return 3; } // no new password given
+      // else ...
+      if (!$cnfpassword) { return 4; } // no confirmation password given
+      // else ...
+      if ($newpassword != $cnfpassword) { return 5; } // passwords mismatch
+      // else ...
+
+      $done = $this->_set_password($id, $newpassword); // let's try this
+
+      if (!$done) { return 6; } // nope, did't word
+      else {
+        $this->db->delete('pwdreset', array("id" => $id)); // done: void/delete reset key
+        return 0;
+      }
+
     }
 
     // ---------------------------------------------------------------------------

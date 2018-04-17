@@ -9,6 +9,7 @@
     2 => "$note Password field can not be left blank.",
     3 => "$err Login failed. Please try again.",
     4 => "$note If you entered an existing user name, password reset instructions have been sent via e-mail.",
+    5 => "$note Password change successfully – you may now log on.",
   ];
 ?>
 

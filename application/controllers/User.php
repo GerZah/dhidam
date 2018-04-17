@@ -176,7 +176,7 @@ class User extends CI_Controller {
 		$newpassword = $this->input->post("newpassword");
 		$userrole = intval($this->input->post("userrole"));
 
-		$createUserResult = $this->user_model->create_user(
+		$createUserResult = $this->user_model->createUser(
 			$username, $email, $newpassword, $userrole
 		);
 
@@ -324,13 +324,17 @@ class User extends CI_Controller {
 
 		$validResetKey = $this->user_model->isValidResetKey($resetKey);
 
+		$passChangeResult = $this->session->flashdata("passChangeResult");
+		$defUsername = $this->session->flashdata("defUsername");
+
 		$viewData = [
-			"passChangeResult" => 0, // +#+#+#
+			"passChangeResult" => $passChangeResult,
 			"resetKey" => $resetKey,
-			"validKey" => $validResetKey
+			"validResetKey" => $validResetKey,
+			"defUsername" => $defUsername
 		];
 
-		echo "<pre>".print_r($viewData,1)."</pre>";
+		// echo "<pre>".print_r($viewData,1)."</pre>";
 
 		$this->load->view("inc/header_view.php");
 		$this->load->view("user/password_reset_key.php", $viewData);
@@ -342,13 +346,21 @@ class User extends CI_Controller {
 	function do_reset_password() {
 		$this->user_model->enforceNoLogin(); // ... or else ...
 
-		$username = $this->input->post("username");
-		$resetKey = $this->input->post("resetkey");
-		$newpassword = $this->input->post("newpassword");
-		$cnfpassword = $this->input->post("cnfpassword");
+		$username = trim($this->input->post("username"));
+		$resetKey = trim($this->input->post("resetkey"));
+		$newpassword = trim($this->input->post("newpassword"));
+		$cnfpassword = trim($this->input->post("cnfpassword"));
 
-		$validResetKey = $this->user_model->isValidResetKey($resetKey, $username);
-
+		$err = $this->user_model->do_reset_password($username, $resetKey, $newpassword, $cnfpassword);
+		if ($err) {
+			$this->session->set_flashdata([ "passChangeResult" => $err ]);
+			$this->session->set_flashdata([ "defUsername" => $username ]);
+			redirect("/user/reset_password/$resetKey"); exit; // turf user over to the login screen
+		}
+		else {
+			$this->session->set_flashdata([ "loginError" => 5, "defUsername" => $username ]);
+			redirect("/user/login/"); exit; // turf user over to the login screen
+		}
 
 	}
 
